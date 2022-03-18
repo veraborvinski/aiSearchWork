@@ -12,6 +12,7 @@ typedef struct movie{
     int Score;
     int Year;
     struct movie* next;
+    struct movie* previous;
     struct movie* parent;
     struct movie* child;
     int visited;
@@ -29,7 +30,7 @@ typedef struct trie{
 
 //Initiating functions
 Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked);
-Movie depthFirstSearch(char dataFile[100], Movie movieClicked);
+Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked);
 Movie aStarSearch(char dataFile[100], Movie movieClicked);
 Trie *constructTrie(Movie lastMovieClicked);
 void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y);
@@ -39,6 +40,8 @@ Trie *initFromFile(char dataFile[100], Movie root);
 Movie searchForMovie(char dataFile[100], char title[100]);
 Frontier *createFrontier();
 void addToFrontier(Frontier *frontier, Movie *movie);
+void printFrontier(Frontier *frontier);
+void printFrontierReverse(Frontier *frontier);
 
 //Allocates memory for tree
 Trie *constructTrie(Movie lastMovieClicked){
@@ -47,6 +50,7 @@ Trie *constructTrie(Movie lastMovieClicked){
     trie->root.child = NULL;
     trie->root.parent = NULL;
     trie->root.next = NULL;
+    trie->root.previous = NULL;
     return trie;
 }
 
@@ -58,6 +62,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
     newMovie->Score = s;
     newMovie->Year = y;
     newMovie->next = NULL;
+    newMovie->previous = NULL;
     newMovie->child = NULL;
     newMovie->visited = 0;
     
@@ -77,7 +82,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
             if(strcmp(currentGenre->Genre, g) == 0){
                 break;
             }
-            currentGenre = currentGenre->next; 
+            currentGenre = currentGenre->next;
 
         }             
         if(strcmp(currentGenre->Genre, g) == 0){
@@ -231,3 +236,58 @@ Movie searchForMovie(char dataFile[100], char title[100]){
     }
     return *found;
 }
+
+//initialises space for frontier
+Frontier *createFrontier(){
+    Frontier *frontier = (Frontier*) malloc(sizeof(Frontier));
+    frontier->head = NULL;
+    frontier->tail = NULL;
+    return frontier;
+}
+
+//adds to frontier
+void addToFrontier(Frontier *frontier, Movie *movie){
+    if(movie->visited == 0)
+    {
+        if(frontier->head != NULL){
+            frontier->tail->next = movie;
+            frontier->tail = movie;
+        }
+        else{
+            frontier->head = movie;
+            frontier->tail = movie;
+        }
+    }
+}
+
+//adds to frontier
+void addToFrontierReverse(Frontier *frontier, Movie *movie){
+    if(movie->visited == 0)
+    {
+        if(frontier->head != NULL){
+            movie->previous = frontier->tail;
+            frontier->tail = movie;
+        }
+        else{            
+            frontier->head = movie;
+            frontier->tail = movie;
+        }
+    }
+}
+
+void printFrontier(Frontier *frontier){
+    Movie *current = frontier->head;
+    while(current != NULL){
+        printf("%s\n", current->Title);
+        current = current->next;
+    }
+}
+
+void printFrontierReverse(Frontier *frontier){
+    Movie *current = frontier->tail;
+    while(current != NULL){
+        printf("%s\n", current->Title);
+        current = current->previous;
+    }
+}
+
