@@ -37,29 +37,6 @@ int main(){
 	return 0;
 }
 
-//initialises space for frontier
-Frontier *createFrontier(){
-    Frontier *frontier = (Frontier*) malloc(sizeof(Frontier));
-    frontier->head = NULL;
-    frontier->tail = NULL;
-    return frontier;
-}
-
-//adds to frontier
-void addToFrontier(Frontier *frontier, Movie *movie){
-    if(movie->visited == 0)
-    {
-        if(frontier->head != NULL){
-            frontier->tail->next = movie;
-            frontier->tail = movie;
-        }
-        else{
-            frontier->head = movie;
-            frontier->tail = movie;
-        }
-    }
-}
-
 //creates frontier
 Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
     Trie *newTrie = initFromFile(dataFile, movieClicked);
