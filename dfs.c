@@ -5,7 +5,7 @@
 #include <time.h>
 /*
 *Author: Vera Borvinski
-*The bfs file performs a breadth-first search
+*The dfs file performs a depth-first search
 */
 
 int main(){
@@ -24,21 +24,21 @@ int main(){
     t2 = clock();
     clock_t t1;
     t1 = clock();
-    Movie *current = breadthFirstSearch(dataFile, movieClicked)->head;
+    Movie *current = depthFirstSearch(dataFile, movieClicked)->tail;
     t1 = clock() - t1;
     double time_taken = ((double)t1)/CLOCKS_PER_SEC;
     while(strcmp(current->Title, goal) != 0){
-        current = current->next;
+        current = current->previous;
         passes++;
     }
     t2 = clock() - t2;
     double time_taken2 = ((double)t2)/CLOCKS_PER_SEC;
     printf("finding the goal state took %d passes\nfinding the first movie took %f seconds \nfinding the goal state took %f", passes, time_taken, time_taken2);
-	return 0;
+    return 0;
 }
 
 //creates frontier
-Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
+Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked){
     Trie *newTrie = initFromFile(dataFile, movieClicked);
     Frontier *frontier = createFrontier();
     Movie *currentGenre = newTrie->root.child;
@@ -51,7 +51,7 @@ Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
                 while(current != NULL){
                     if(current->visited == 0)
                     {
-                        addToFrontier(frontier, current);
+                        addToFrontierReverse(frontier, current);
                     }
                     current = current->next;
                 }
