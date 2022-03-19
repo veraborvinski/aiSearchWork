@@ -4,7 +4,7 @@
 #include "search.h"
 /*
 *Author: Vera Borvinski
-*The trie file is used as an access point for the project
+*The trie file is used as a tester for the trie struct
 */
 
 int main(){
