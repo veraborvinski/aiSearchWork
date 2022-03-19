@@ -9,10 +9,13 @@
 */
 
 int main(){
-    int passes = 0;
+    int passes = 1;
+    int pathCost1 = 0;
+    int totalPathCost = 0;
     char searchFor[100];
     char goal[100];
     char dataFile[100];
+
     printf("input root node title\n");
     scanf("%s", searchFor);
     printf("input data file\n");
@@ -20,21 +23,28 @@ int main(){
     Movie movieClicked = searchForMovie(dataFile, searchFor);    
     printf("input goal state title\n");
     scanf("%s", goal);
+
     clock_t t2;
     t2 = clock();
     clock_t t1;
     t1 = clock();
     Movie *current = breadthFirstSearch(dataFile, movieClicked)->head;
+    pathCost1 = current->pathCost;
+
     t1 = clock() - t1;
     double time_taken = ((double)t1)/CLOCKS_PER_SEC;
     while(strcmp(current->Title, goal) != 0){
+        totalPathCost += current->pathCost;
+        current->visited = 1;
         current = current->next;
         passes++;
     }
     t2 = clock() - t2;
     double time_taken2 = ((double)t2)/CLOCKS_PER_SEC;
-    printf("finding the goal state took %d passes\nfinding the first movie took %f seconds \nfinding the goal state took %f", passes, time_taken, time_taken2);
-	return 0;
+
+    printf("finding the goal state took %d passes\nfinding the first movie took %f seconds with a path cost of %d\nfinding the goal state took %f seconds with a path cost of %d", passes, time_taken, pathCost1, time_taken2, totalPathCost);
+    
+    return 0;
 }
 
 //creates frontier
