@@ -11,6 +11,7 @@ typedef struct movie{
     char Genre[100];
     int Score;
     int Year;
+    int pathCost;
     struct movie* next;
     struct movie* previous;
     struct movie* parent;
@@ -31,7 +32,7 @@ typedef struct trie{
 //Initiating functions
 Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked);
 Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked);
-Movie aStarSearch(char dataFile[100], Movie movieClicked);
+Frontier *aStarSearch(char dataFile[100], Movie movieClicked);
 Trie *constructTrie(Movie lastMovieClicked);
 void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y);
 void printTrie(Trie *trie);
@@ -42,6 +43,10 @@ Frontier *createFrontier();
 void addToFrontier(Frontier *frontier, Movie *movie);
 void printFrontier(Frontier *frontier);
 void printFrontierReverse(Frontier *frontier);
+Movie *movcpy(Movie *movie1, Movie *movie2);
+Frontier *heuristicFunction(Frontier *frontier, Movie *root);
+Frontier *pathCostFunction(Frontier *frontier);
+Frontier *aStarQueueConstructor(char dataFile[100], Movie movieClicked);
 
 //Allocates memory for tree
 Trie *constructTrie(Movie lastMovieClicked){
@@ -51,6 +56,7 @@ Trie *constructTrie(Movie lastMovieClicked){
     trie->root.parent = NULL;
     trie->root.next = NULL;
     trie->root.previous = NULL;
+    trie->root.visited = 1;
     return trie;
 }
 
@@ -61,6 +67,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
     strcpy(newMovie->Genre, g);
     newMovie->Score = s;
     newMovie->Year = y;
+    newMovie->pathCost = 0;
     newMovie->next = NULL;
     newMovie->previous = NULL;
     newMovie->child = NULL;
@@ -69,6 +76,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
     if (trie->root.child == NULL){
         trie->root.child = newMovie;
         trie->root.child->parent = &trie->root;
+        trie->root.child->pathCost = 1;
 
         addToTrie(trie, newMovie->Title,  newMovie->Genre, newMovie->Score, newMovie->Year);
         addToTrie(trie, newMovie->Title,  newMovie->Genre, newMovie->Score, newMovie->Year);
@@ -90,6 +98,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
                 currentGenre->child = (Movie*) malloc(sizeof(Movie));
                 currentGenre->child = newMovie;
                 currentGenre->child->parent = currentGenre;
+                currentGenre->child->pathCost = 2;
             }
             else{
                 Movie *currentScore = currentGenre->child;
@@ -107,6 +116,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
                         currentScore->child = (Movie*) malloc(sizeof(Movie));
                         currentScore->child = newMovie;
                         currentScore->child->parent = currentScore;
+                        currentScore->child->pathCost = 3;
                     }
                     else{
                         Movie *currentYear = currentScore->child;
@@ -124,6 +134,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
                                 currentYear->child = (Movie*) malloc(sizeof(Movie));
                                 currentYear->child = newMovie;
                                 currentYear->child->parent = currentYear;
+                                currentYear->child->pathCost = 4;
                             }
                             else{
                                 Movie *current = currentYear->child;
@@ -133,6 +144,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
                                 current->next = (Movie*) malloc(sizeof(Movie));
                                 current->next = newMovie;
                                 current->next->parent = current->parent;
+                                current->next->pathCost = 4;
                             }
                         }
                         else if(currentYear->next == NULL){
@@ -140,6 +152,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
                             currentYear->next = newMovie;
                             addToTrie(trie, newMovie->Title,  newMovie->Genre, newMovie->Score, newMovie->Year);
                             currentYear->next->parent = currentYear->parent;
+                            currentYear->next->pathCost = 3;
                         }
                     }
                 }
@@ -149,6 +162,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
                     addToTrie(trie, newMovie->Title,  newMovie->Genre, newMovie->Score, newMovie->Year);
                     addToTrie(trie, newMovie->Title,  newMovie->Genre, newMovie->Score, newMovie->Year);
                     currentScore->next->parent = currentScore->parent;
+                    currentScore->next->pathCost = 2;
                 }
             }
         }
@@ -159,6 +173,7 @@ void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y){
             addToTrie(trie, newMovie->Title,  newMovie->Genre, newMovie->Score, newMovie->Year);
             addToTrie(trie, newMovie->Title,  newMovie->Genre, newMovie->Score, newMovie->Year);
             currentGenre->next->parent = &trie->root;
+            currentGenre->next->pathCost = 1;
         }    
     }
 }
@@ -225,7 +240,7 @@ Movie searchForMovie(char dataFile[100], char title[100]){
     if (fp!=NULL) {
         while ((fscanf(fp, "%s , %s , %d , %d", film, genre, &score, &year)>0))
         {
-            if(strcmp(title, film) != 0){
+            if(strcmp(title, film) == 0){
                 strcpy(found->Title, film);
                 strcpy(found->Genre, genre);
                 found->Score = score;
@@ -275,14 +290,26 @@ void addToFrontierReverse(Frontier *frontier, Movie *movie){
     }
 }
 
+//copies movie data from one movie to another
+Movie *movcpy(Movie *movie1, Movie *movie2){
+    strcpy(movie1->Title, movie2->Title);
+    strcpy(movie1->Genre, movie2->Genre);
+    movie1->Score = movie2->Score;
+    movie1->Year = movie2->Year;
+    movie1->pathCost = movie2->pathCost;
+    return movie1;
+}
+
+//prints frontier
 void printFrontier(Frontier *frontier){
     Movie *current = frontier->head;
     while(current != NULL){
-        printf("%s\n", current->Title);
+        printMovieInfo(current);
         current = current->next;
     }
 }
 
+//prints frontier for movies that have been added in reverse
 void printFrontierReverse(Frontier *frontier){
     Movie *current = frontier->tail;
     while(current != NULL){
@@ -291,3 +318,103 @@ void printFrontierReverse(Frontier *frontier){
     }
 }
 
+//sorts by similarity to root
+Frontier *heuristicFunction(Frontier *frontier, Movie *root){
+    Frontier *sorted = createFrontier();
+    Movie *current = frontier->head;
+                   
+    while(current != NULL){
+        if(strcmp(current->Genre, root->Genre) == 0 && current->Score == root->Score && current->Year == root->Year && current->visited == 0){
+            Movie *temp = (Movie*) malloc(sizeof(Movie));
+            temp = movcpy(temp, current);
+            addToFrontier(sorted, temp);
+            current->visited = 1;
+        }
+        current = current->next;
+    }
+
+    current = frontier->head;
+    while(strcmp(current->Genre, root->Genre) == 0 && current->Score == root->Score && current != NULL){
+        if(current->visited == 0){
+            Movie *temp = (Movie*) malloc(sizeof(Movie));
+            temp = movcpy(temp, current);
+            addToFrontier(sorted, temp);
+            current->visited = 1;
+        }
+        current = current->next;
+    }
+
+    current = frontier->head;
+    while(strcmp(current->Genre, root->Genre) == 0 && current != NULL){
+        if(current->visited == 0){
+            Movie *temp = (Movie*) malloc(sizeof(Movie));
+            temp = movcpy(temp, current);
+            addToFrontier(sorted, temp);
+            current->visited = 1;
+        }
+        current = current->next;
+    }
+
+    current = frontier->head;
+    while(current->Score == root->Score &&current != NULL){
+        if(current->visited == 0){
+            Movie *temp = (Movie*) malloc(sizeof(Movie));
+            temp = movcpy(temp, current);
+            addToFrontier(sorted, temp);
+            current->visited = 1;
+        }
+        current = current->next;
+    }
+
+    current = frontier->head;
+    while(current->Year == root->Year &&current != NULL){
+        if(current->visited == 0){
+            Movie *temp = (Movie*) malloc(sizeof(Movie));
+            temp = movcpy(temp, current);
+            addToFrontier(sorted, temp);
+            current->visited = 1;
+        }
+        current = current->next;
+    }
+
+    current = frontier->head;
+    while(current != NULL){
+        if(current->visited == 0){
+            Movie *temp = (Movie*) malloc(sizeof(Movie));
+            temp = movcpy(temp, current);
+            addToFrontier(sorted, temp);
+            current->visited = 1;
+        }
+        current = current->next;
+    }
+    
+    return sorted;
+}
+
+//always choses parent over child
+Frontier *pathCostFunction(Frontier *frontier){
+    int sorted;
+    do
+    {
+        int swaps = 0;
+        Movie *current = frontier->head;
+
+        while(current != NULL &&current->next != NULL){
+            Movie *currentNext = current->next;
+            if(current->pathCost > currentNext->pathCost){
+                Movie temp = { .Title = "", .Genre = "", .Score = 0, .Year = 0};
+                temp = *movcpy(&temp, current);
+                current = movcpy(current, currentNext);
+                currentNext = movcpy(currentNext, &temp);
+
+                swaps++;
+            }
+            current = current->next;
+        }
+        if(swaps == 0){
+            sorted = 1;
+        }
+    }
+    while(sorted == 0);
+    return frontier;
+}

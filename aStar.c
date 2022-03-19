@@ -5,8 +5,10 @@
 #include <time.h>
 /*
 *Author: Vera Borvinski
-*The bfs file performs a breadth-first search
+*The aStar file performs a a* search
 */
+
+Frontier *evaluationFunction(Frontier *frontier, Movie *root);
 
 int main(){
     int passes = 1;
@@ -20,7 +22,7 @@ int main(){
     scanf("%s", searchFor);
     printf("input data file\n");
     scanf("%s", dataFile);
-    Movie movieClicked = searchForMovie(dataFile, searchFor);    
+    Movie movieClicked = searchForMovie(dataFile, searchFor);  
     printf("input goal state title\n");
     scanf("%s", goal);
 
@@ -28,7 +30,7 @@ int main(){
     t2 = clock();
     clock_t t1;
     t1 = clock();
-    Movie *current = breadthFirstSearch(dataFile, movieClicked)->head;
+    Movie *current = evaluationFunction(aStarQueueConstructor(dataFile, movieClicked), &movieClicked)->head;
     pathCost1 = current->pathCost;
 
     t1 = clock() - t1;
@@ -47,16 +49,27 @@ int main(){
     return 0;
 }
 
+//combines path cost function and heuristic function for a star search
+Frontier *evaluationFunction(Frontier *frontier, Movie *root){
+    return heuristicFunction(pathCostFunction(frontier), root);
+}
+
 //creates frontier
-Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
+Frontier *aStarQueueConstructor(char dataFile[100], Movie movieClicked){
     Trie *newTrie = initFromFile(dataFile, movieClicked);
     Frontier *frontier = createFrontier();
     Movie *currentGenre = newTrie->root.child;
-    while(currentGenre != NULL){
+    while(currentGenre != NULL){   
+        currentGenre->child->visited = 1;
+        currentGenre->child->child->visited = 1;
+        currentGenre->child->child->child->visited = 1;     
         Movie *currentScore = currentGenre->child;
         while(currentScore != NULL){
+            currentScore->child->visited = 1;
+            currentScore->child->child->visited = 1;
             Movie *currentYear = currentScore->child;
-            while(currentYear != NULL){
+            while(currentYear != NULL){  
+                currentYear->child->visited = 1;     
                 Movie *current = currentYear->child;
                 while(current != NULL){
                     if(current->visited == 0)
@@ -65,9 +78,21 @@ Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
                     }
                     current = current->next;
                 }
+                if(currentYear->visited == 0)
+                {
+                    addToFrontier(frontier, currentYear);
+                }
                 currentYear = currentYear->next;
             }
+            if(currentScore->visited == 0)
+            {
+                addToFrontier(frontier, currentScore);
+            }
             currentScore = currentScore->next;
+        }
+        if(currentGenre->visited == 0)
+        {
+            addToFrontier(frontier, currentGenre);
         }
         currentGenre = currentGenre->next;
     }

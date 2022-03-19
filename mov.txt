@@ -24,7 +24,6 @@ Tangled , Animation , 8 , 2010
 SomethingBorrowed , Romance , 4 , 2011
 She'sOutofMyLeague , Comedy , 6 , 2010
 SexandtheCityTwo , Comedy , 4 , 2010
-SexandtheCity2 , Comedy , 4 , 2010
 SexandtheCity , Comedy , 8 , 2008
 RememberMe , Drama , 7 , 2010
 RachelGettingMarried , Drama , 6 , 2008
@@ -44,7 +43,6 @@ MissPettigrewLivesforaDay , Comedy , 7 , 2008
 MidnightinParis , Romance , 8 , 2011
 MarleyandMe , Comedy , 7 , 2008
 MammaMia! , Comedy , 7 , 2008
-MammaMia! , Comedy , 7 , 2008
 MadeofHonor , Comedy , 6 , 2008
 LoveHappens , Drama , 4 , 2009
 Love&OtherDrugs , Comedy , 5 , 2010
@@ -62,7 +60,6 @@ HighSchoolMusical3:SeniorYear , Comedy , 7 , 2008
 He'sJustNotThatIntoYou , Comedy , 6 , 2009
 GoodLuckChuck , Comedy , 6 , 2007
 GoingtheDistance , Comedy , 5 , 2010
-GnomeoandJuliet , Animation , 5 , 2011
 GnomeoandJuliet , Animation , 5 , 2011
 GhostsofGirlfriendsPast , Comedy , 4 , 2009
 FourChristmases , Comedy , 5 , 2008
