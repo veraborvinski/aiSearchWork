@@ -28,7 +28,7 @@ int main(){
     t2 = clock();
     clock_t t1;
     t1 = clock();
-    Movie *current = depthFirstSearch(dataFile, movieClicked)->tail;
+    Movie *current = depthFirstSearch(dataFile, movieClicked, goal)->tail;
     pathCost1 = current->pathCost;
 
     t1 = clock() - t1;
@@ -48,7 +48,7 @@ int main(){
 }
 
 //creates frontier
-Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked){
+Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked, char goalState[100]){
     Trie *newTrie = initFromFile(dataFile, movieClicked);
     Frontier *frontier = createFrontier();
     Movie *currentGenre = newTrie->root.child;
@@ -62,6 +62,9 @@ Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked){
                     if(current->visited == 0)
                     {
                         addToFrontierReverse(frontier, current);
+                        if(strcmp(current->Title, goalState)==0){
+                            break;
+                        }
                     }
                     current = current->next;
                 }
