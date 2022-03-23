@@ -30,7 +30,7 @@ int main(){
     t2 = clock();
     clock_t t1;
     t1 = clock();
-    Movie *current = evaluationFunction(aStarQueueConstructor(dataFile, movieClicked), &movieClicked)->head;
+    Movie *current = aStarSearch(dataFile, movieClicked, goal)->head;
     pathCost1 = current->pathCost;
 
     t1 = clock() - t1;
@@ -97,4 +97,14 @@ Frontier *aStarQueueConstructor(char dataFile[100], Movie movieClicked){
         currentGenre = currentGenre->next;
     }
     return frontier;
+}
+
+Frontier *aStarSearch(char dataFile[100], Movie movieClicked, char goalState[100]){
+    Movie *current = evaluationFunction(aStarQueueConstructor(dataFile, movieClicked), &movieClicked)->head;
+    Frontier *finalFrontier = createFrontier();
+    while(strcmp(current->Title, goalState) != 0){
+        addToFrontier(finalFrontier, current);
+        current = current->next;
+    }
+    return finalFrontier;
 }

@@ -32,7 +32,7 @@ typedef struct trie{
 //Initiating functions
 Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked);
 Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked, char goalState[100]);
-Frontier *aStarSearch(char dataFile[100], Movie movieClicked);
+Frontier *aStarSearch(char dataFile[100], Movie movieClicked, char goalState[100]);
 Trie *constructTrie(Movie lastMovieClicked);
 void addToTrie(Trie *trie, char t[100],  char g[100], int s, int y);
 void printTrie(Trie *trie);

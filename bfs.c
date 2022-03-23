@@ -42,7 +42,7 @@ int main(){
     t2 = clock() - t2;
     double time_taken2 = ((double)t2)/CLOCKS_PER_SEC;
 
-    printf("finding the goal state took %d passes\nfinding the first movie took %f seconds with a path cost of %d\nfinding the goal state took %f seconds with a path cost of %d", passes, time_taken, pathCost1, time_taken2, totalPathCost);
+    printf(", took %d passes, and took %f seconds\nfinding the first movie took %f seconds with a path cost of %d\n", passes, time_taken2, time_taken, pathCost1);
     
     return 0;
 }
@@ -51,14 +51,19 @@ int main(){
 Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
     Trie *newTrie = initFromFile(dataFile, movieClicked);
     Frontier *frontier = createFrontier();
+    int pc = 1;
     Movie *currentGenre = newTrie->root.child;
     while(currentGenre != NULL){
+        pc++;
         Movie *currentScore = currentGenre->child;
         while(currentScore != NULL){
+            pc++;
             Movie *currentYear = currentScore->child;
             while(currentYear != NULL){
+                pc++;
                 Movie *current = currentYear->child;
                 while(current != NULL){
+                    pc++;
                     if(current->visited == 0)
                     {
                         addToFrontier(frontier, current);
@@ -71,5 +76,6 @@ Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
         }
         currentGenre = currentGenre->next;
     }
+    printf("finding the goal state had a path cost of %d", pc);
     return frontier;
 }
