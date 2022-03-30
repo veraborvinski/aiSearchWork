@@ -33,7 +33,7 @@ int main(){
 
     t1 = clock() - t1;
     double time_taken = ((double)t1)/CLOCKS_PER_SEC;
-    while(strcmp(current->Title, goal) != 0){
+    while(current != NULL){
         totalPathCost += current->pathCost;
         current->visited = 1;
         current = current->previous;
@@ -50,35 +50,48 @@ int main(){
 //creates frontier
 Frontier *depthFirstSearch(char dataFile[100], Movie movieClicked, char goalState[100]){
     Trie *newTrie = initFromFile(dataFile, movieClicked);
-    Frontier *frontier = createFrontier();
+    Frontier *expandedQueue = createFrontier();
     int pc = 1;
+    int stop = 0;
     Movie *currentGenre = newTrie->root.child;
-    while(currentGenre != NULL){
+    while(currentGenre != NULL && stop == 0){
         pc++;
         Movie *currentScore = currentGenre->child;
-        while(currentScore != NULL){
+        while(currentScore != NULL && stop == 0){
             pc++;
             Movie *currentYear = currentScore->child;
-            while(currentYear != NULL){
+            while(currentYear != NULL && stop == 0){
                 pc++;
-                Movie *current = currentYear->child;
-                while(current != NULL){
+                Movie *current = currentYear->child;                
+                while(current != NULL && stop == 0){
                     pc++;
                     if(current->visited == 0)
                     {
-                        addToFrontierReverse(frontier, current);
+                        addToFrontierReverse(expandedQueue, current);
                         if(strcmp(current->Title, goalState)==0){
-                            break;
+                            stop = 1;
                         }
                     }
                     current = current->next;
                 }
+                if(currentYear->visited == 0)
+                {
+                    addToFrontierReverse(expandedQueue, currentYear);
+                }
                 currentYear = currentYear->next;
             }
+            if(currentScore->visited == 0)
+            {
+                addToFrontierReverse(expandedQueue, currentScore);
+            }
             currentScore = currentScore->next;
+        }
+        if(currentGenre->visited == 0)
+        {
+            addToFrontierReverse(expandedQueue, currentGenre);
         }
         currentGenre = currentGenre->next;
     }
     printf("finding the goal state had a path cost of %d", pc);
-    return frontier;
+    return expandedQueue;
 }
