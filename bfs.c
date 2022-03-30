@@ -28,7 +28,7 @@ int main(){
     t2 = clock();
     clock_t t1;
     t1 = clock();
-    Movie *current = breadthFirstSearch(dataFile, movieClicked)->head;
+    Movie *current = breadthFirstSearch(dataFile, movieClicked, goal)->head;
     pathCost1 = current->pathCost;
 
     t1 = clock() - t1;
@@ -48,10 +48,11 @@ int main(){
 }
 
 //creates frontier
-Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
+Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked, char goalState[100]){
     Trie *newTrie = initFromFile(dataFile, movieClicked);
     Frontier *frontier = createFrontier();
     int pc = 1;
+    int stop = 0;
     Movie *currentGenre = newTrie->root.child;
     while(currentGenre != NULL){
         pc++;
@@ -62,11 +63,14 @@ Frontier *breadthFirstSearch(char dataFile[100], Movie movieClicked){
             while(currentYear != NULL){
                 pc++;
                 Movie *current = currentYear->child;
-                while(current != NULL){
+                while(current != NULL && stop == 0){
                     pc++;
                     if(current->visited == 0)
                     {
                         addToFrontier(frontier, current);
+                        if(strcmp(current->Title, goalState)==0){
+                            stop = 1;
+                        }
                     }
                     current = current->next;
                 }
